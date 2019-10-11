@@ -1,0 +1,13 @@
+FROM logstash:6.7.0
+
+WORKDIR /logstash/config
+COPY elk.conf /logstash/config/elk.conf
+COPY normal.json /logstash/config/normal.json
+COPY sip-process.json /logstash/config/sip-process.json
+COPY mqtt-process.json /logstash/config/mqtt-process.json
+COPY rtp-process.json /logstash/config/rtp-process.json
+#COPY mysql-connector-java-5.1.47.jar /logstash/config/mysql-connector-java-5.1.47.jar
+
+#RUN logstash-plugin install logstash-output-jdbc
+
+CMD ["-f","/logstash/config/elk.conf"]
