@@ -1,0 +1,127 @@
+version: "3"
+services:
+  apidao:
+    image: orange2019/orangeiot_test:apidao
+    depends_on:
+      - zoo1
+      - redis
+      - mongo
+    environment:
+      TZ: Asia/Shanghai
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+  sipserver:
+    image: orange2019/orangeiot_test:sipserver
+    ports:
+      - "5061:5061/udp"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    depends_on:
+      - apidao
+    environment:
+      TZ: Asia/Shanghai
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+  rtpserver:
+    image: orange2019/orangeiot_test:rtpserver
+    ports:
+      - "5006:5006"
+      - "5008:5008"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    depends_on:
+      - apidao
+    environment:
+      TZ: Asia/Shanghai
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+  httpmanagent:
+    image: orange2019/orangeiot_test:httpmanagent
+    depends_on:
+      - apidao
+    environment:
+      TZ: Asia/Shanghai
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+  httpmemenet:
+    image: orange2019/orangeiot_test:httpmemenet
+    depends_on:
+      - apidao
+    environment:
+      TZ: Asia/Shanghai
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+  httpserver:
+    image: orange2019/orangeiot_test:httpserver
+    ports:
+      - "8090:8090"
+    depends_on:
+      - apidao
+    environment:
+      TZ: Asia/Shanghai
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+  mqttauth:
+    image: orange2019/orangeiot_test:mqttauth
+    depends_on:
+      - apidao
+    environment:
+      TZ: Asia/Shanghai
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+  mqttjob:
+    image: orange2019/orangeiot_test:mqttjob
+    depends_on:
+      - apidao
+    environment:
+      TZ: Asia/Shanghai
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+  mqttmessage:
+    image: orange2019/orangeiot_test:mqttmessage
+    depends_on:
+      - apidao
+    environment:
+      TZ: Asia/Shanghai
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+  mqttpublish:
+    image: orange2019/orangeiot_test:mqttpublish
+    depends_on:
+      - apidao
+    environment:
+      TZ: Asia/Shanghai
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+  mqttserver:
+    image: orange2019/orangeiot_test:mqttserver
+    ports:
+      - "1883:1883"
+    depends_on:
+      - apidao
+    environment:
+      TZ: Asia/Shanghai
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure 
