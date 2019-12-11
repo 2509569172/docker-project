@@ -1,0 +1,73 @@
+version: "3"
+services:
+  elasticsearch:
+    image: elasticsearch:6.7.0
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    environment:
+      TZ: Asia/Shanghai
+#      network.host: 192.168.3.207
+      http.cors.enabled: "true"
+      http.cors.allow-origin: "*"
+      ES_JAVA_OPTS: "-Xms2g -Xmx2g"
+      #index.translog.durability: async
+    deploy:
+      restart_policy:
+        condition: on-failure
+      replicas: 1
+    volumes:
+      - /usr/local/work/docker/elk/esdata:/usr/share/elasticsearch/data
+  zoo1:
+    image: zookeeper:3.4
+    hostname: zoo1
+    ports:
+      - "2181:2181"
+    #command: ["/wait/wait-for-it.sh","elasticsearch","--"]
+    environment:
+      TZ: Asia/Shanghai
+      ZOO_MY_ID: 1
+      ZOO_SERVERS: server.1=zoo1:2888:3888
+    volumes:
+     # - /usr/local/work/docker/elk/wait:/wait
+      - /usr/local/work/docker/elk/zk_data:/data
+      - /usr/local/work/docker/elk/zk_datalog:/datalog
+  kafka1:
+    image: wurstmeister/kafka
+    hostname: kafka1
+    ports:
+      - "9092:9092"
+    #command: ["/wait/wait-for-it.sh","zoo1","--"]
+    environment:
+      TZ: Asia/Shanghai
+      #KAFKA_BROKER_ID: 1
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
+      KAFKA_ADVERTISED_HOST_NAME: 192.168.3.207
+      KAFKA_ADVERTISED_PORT: 9092
+      KAFKA_ZOOKEEPER_CONNECT: zoo1:2181
+      #KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://192.168.3.207:9092
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "/usr/local/work/docker/elk/kafka:/kafka"
+     # - "/usr/local/work/docker/elk/wait:/wait"
+    depends_on:
+      - zoo1
+  logstash:
+    image: orange2019/elk:logstash_rbs2
+    depends_on:
+      - kafka1
+      - elasticsearch
+    #command: ["/wait/wait-for-it.sh","kafka1","--"]
+    deploy:
+      restart_policy:
+        condition: on-failure
+      replicas: 1
+    environment:
+      TZ: Asia/Shanghai
+      #pipeline.workers: 4
+      #pipeline.output.workers: 4
+      #pipeline.batch.size: 3000
+      #pipeline.batch.delay: 100
+    #volumes:
+    #  - "/usr/local/work/docker/elk/wait:/wait"
+ 

@@ -1,0 +1,17 @@
+FROM logstash:6.7.0
+
+WORKDIR /logstash/config
+COPY elk-rubys.conf /logstash/config/elk-rubys.conf
+COPY normal.json /logstash/config/normal.json
+COPY sip-process.json /logstash/config/sip-process.json
+COPY mqtt-process.json /logstash/config/mqtt-process.json
+COPY rtp-process.json /logstash/config/rtp-process.json
+COPY mysql-connector-java-5.1.47.jar /logstash/config/mysql-connector-java-5.1.47.jar
+
+COPY sipflow.rb /logstash/config/sipflow.rb
+COPY rtpflow.rb /logstash/config/rtpflow.rb
+#COPY stp-flow.json /logstash/config/stp-flow.json
+
+RUN logstash-plugin install --no-verify logstash-output-jdbc
+
+CMD ["-f","/logstash/config/elk-rubys.conf"]

@@ -6,22 +6,13 @@ def filter(event)
 	if from.match(/^SIP:/)
 		if serverport==5006
 			if to=="server"
-				event.set("flow","09")
-			else
-				event.set("flow","10")
-			end
-		end
-		
-		if serverport==5008
-			if to=="server"
 				event.set("flow","11")
 			else
 				event.set("flow","12")
 			end
 		end
 		
-	else
-		if serverport==5006
+		if serverport==5008
 			if to=="server"
 				event.set("flow","13")
 			else
@@ -29,11 +20,20 @@ def filter(event)
 			end
 		end
 		
-		if serverport==5008
+	else
+		if serverport==5006
 			if to=="server"
 				event.set("flow","15")
 			else
 				event.set("flow","16")
+			end
+		end
+		
+		if serverport==5008
+			if to=="server"
+				event.set("flow","17")
+			else
+				event.set("flow","18")
 			end
 		end		
 	end
