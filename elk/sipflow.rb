@@ -20,6 +20,12 @@ def filter(event)
 		elsif sipmsg.match(/^SIP\/2.0 200 OK/)
 			start1=sipmsg.index("CSEQ:")
 			end1=sipmsg.index("\\R\\N",start1+5)
+			if end1==nil
+				end1=sipmsg.index("\R\N",start1+5)
+				if end1==nil
+					end1=sipmsg.index("\r\n",start1+5)
+				end
+			end
 			str1=sipmsg[start1+5,end1]
 			if str1.include?"INVITE"
 				event.set("flow","07")
@@ -29,6 +35,12 @@ def filter(event)
 		elsif sipmsg.match(/^SIP\/2.0 4/) or sipmsg.match(/^SIP\/2.0 5/) or sipmsg.match(/^SIP\/2.0 6/)
 			start2=sipmsg.index("CSEQ:")
 			end2=sipmsg.index("\\R\\N",start2+5)
+			if end2==nil
+				end2=sipmsg.index("\R\N",start2+5)
+				if end2==nil
+					end2=sipmsg.index("\r\n",start2+5)
+				end
+			end
 			str2 = sipmsg[start2+5,end2]
 			if str2.include?"INVITE"
 				event.set("flow","07")
@@ -42,6 +54,12 @@ def filter(event)
 		if sipmsg.match(/^SIP\/2.0 200 OK/)
 			start=sipmsg.index("CSEQ:")
 			endd=sipmsg.index("\\R\\N",start+5)
+			if endd==nil
+				endd=sipmsg.index("\R\N",start+5)
+				if endd==nil
+					endd=sipmsg.index("\r\n",start+5)
+				end
+			end
 			str=sipmsg[start+5,endd]
 			if str.include?"REGISTER"
 				event.set("flow","44")
@@ -67,6 +85,12 @@ def filter(event)
 		elsif sipmsg.match(/^SIP\/2.0 4/) or sipmsg.match(/^SIP\/2.0 5/) or sipmsg.match(/^SIP\/2.0 6/)
 			start3=sipmsg.index("CSEQ:")
 			end3=sipmsg.index("\\R\\N",start3+5)
+			if end3==nil
+				end3=sipmsg.index("\R\N",start3+5)
+				if end3==nil
+					end3=sipmsg.index("\r\n",start3+5)
+				end
+			end
 			str3=sipmsg[start3+5,end3]
 			if str3.include?"INVITE"
 				event.set("flow","08")

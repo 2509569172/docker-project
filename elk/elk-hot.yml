@@ -1,0 +1,86 @@
+version: "3.7"
+services:
+  elasticsearch:
+    image: elasticsearch:6.7.0
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    environment:
+      TZ: Asia/Shanghai
+#      network.host: 192.168.3.207
+      http.cors.enabled: "true"
+      http.cors.allow-origin: "*"
+      ES_JAVA_OPTS: "-Xms256m -Xmx256m"
+      #index.translog.durability: async
+    deploy:
+      restart_policy:
+        condition: on-failure
+      replicas: 1
+    volumes:
+      - $PWD/esdata:/usr/share/elasticsearch/data
+      - $PWD/eslog:/usr/share/elasticsearch/logs
+  zoo1:
+    image: zookeeper:3.4
+    hostname: zoo1
+    ports:
+      - "2181:2181"
+    #command: ["/wait/wait-for-it.sh","elasticsearch","--"]
+    environment:
+      TZ: Asia/Shanghai
+      ZOO_MY_ID: 1
+      ZOO_SERVERS: server.1=zoo1:2888:3888
+    volumes:
+     # - /usr/local/work/docker/elk/wait:/wait
+      - $PWD/zk_data:/data
+      - $PWD/zk_datalog:/datalog
+    deploy:
+      restart_policy:
+        condition: on-failure
+      replicas: 1
+  kafka1:
+    image: wurstmeister/kafka
+    hostname: kafka1
+    ports:
+      - "9092:9092"
+    #command: ["/wait/wait-for-it.sh","zoo1","--"]
+    environment:
+      TZ: Asia/Shanghai
+      #KAFKA_BROKER_ID: 1
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
+      KAFKA_ADVERTISED_HOST_NAME: 192.168.3.207
+      KAFKA_ADVERTISED_PORT: 9092
+      KAFKA_ZOOKEEPER_CONNECT: zoo1:2181
+      #KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://192.168.3.207:9092
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "$PWD/kafka:/kafka"
+     # - "/usr/local/work/docker/elk/wait:/wait"
+    depends_on:
+      - zoo1
+    deploy:
+      restart_policy:
+        condition: on-failure
+      replicas: 1
+  logstash:
+    image: orange2019/elk:logstash_rbs21
+    depends_on:
+      - kafka1
+      - elasticsearch
+    #command: ["/wait/wait-for-it.sh","kafka1","--"]
+    deploy:
+      restart_policy:
+        condition: on-failure
+      replicas: 1
+    environment:
+      TZ: Asia/Shanghai
+      #config.reload.automatic: "true"
+      #pipeline.workers: 4
+      #pipeline.output.workers: 4
+      #pipeline.batch.size: 3000
+      #pipeline.batch.delay: 100
+    volumes:
+      - $PWD/config/elk-rubys.conf:/logstash/config/elk-rubys.conf
+      - $PWD/logstash:/usr/share/logstash/data
+      #- $PWD/config/logstash.yml:/usr/share/logstash/config/logstash.yml
+    #  - "/usr/local/work/docker/elk/wait:/wait"
+ 
