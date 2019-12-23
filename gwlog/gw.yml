@@ -1,0 +1,15 @@
+version: "3.7"
+services:
+    gwlog:
+        image: orange2019/gwlog:v2.0.0
+        ports:
+            - "5555:5555"
+        environment:
+            TZ: Asia/Shanghai
+        deploy:
+            restart_policy:
+                condition: on-failure
+            replicas: 1
+        volumes:
+            - $PWD/gw_log:/orangeiot/gw_log
+            - $PWD/logs:/orangeiot/logs
